@@ -14,6 +14,7 @@ def get_image(camera):
     image = np.frombuffer(raw_image, np.uint8).reshape(
         (camera.getHeight(), camera.getWidth(), 4)
     )
+    print(image.shape)
     return image
 
 #Image processing
@@ -38,7 +39,7 @@ def display_image(display, image):
 manual_steering = 0
 steering_angle = 0
 angle = 0.0
-speed = 20
+speed = 30
 
 # set target speed
 def set_speed(kmh):
@@ -69,14 +70,13 @@ def change_steer_angle(inc):
     # Validate interval 
     if new_manual_steering <= 25.0 and new_manual_steering >= -25.0: 
         manual_steering = new_manual_steering
-        set_steering_angle(manual_steering * 0.02)
+        set_steering_angle(manual_steering * 0.01)
     # Debugging
     if manual_steering == 0:    
         #print("going straight")
         pass
     else:
         turn = "left" if steering_angle < 0 else "right"
-        #print("turning {} rad {}".format(str(steering_angle),turn))
 
 # main
 def main():
@@ -135,7 +135,7 @@ def main():
         elif key == ord('A'):
             #filename with timestamp and saved in current directory
             pass
-        current_datetime = str(datetime.now().strftime("%Y-%m-%d %H-%M-%S"))
+        current_datetime = str(datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f"))
         file_name = current_datetime + ".png"
         
         print("Image taken")
