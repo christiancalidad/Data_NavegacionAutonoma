@@ -120,8 +120,8 @@ def main():
         
         print(os.getcwd() + "/" + file_name)
         print(angle)
-        image_pil = Image.fromarray(image)
-        image_pil.save(os.path.join(image_save_path, file_name))
+        #image_pil = Image.fromarray(image)
+        #image_pil.save(os.path.join(image_save_path, file_name))
             
         
             
