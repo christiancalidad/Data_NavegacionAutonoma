@@ -105,7 +105,7 @@ def main():
     if not os.path.exists(csv_file_path):
         with open(csv_file_path, mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(["Image Name", "Angle"])
+            writer.writerow(["Image Name", "Angle","Wheel angle"])
 
     while robot.step() != -1:
         
@@ -141,7 +141,7 @@ def main():
         
         print("Image taken")
         print(os.getcwd() + "/" + file_name)
-        print(angle)
+        print(angle,wheel_angle)
         image_pil = Image.fromarray(image)
         image_pil.save(os.path.join(image_save_path, file_name))
         #camera.saveImage(os.path.join(image_save_path, file_name), 1)
@@ -149,7 +149,7 @@ def main():
         if file_name != last_file_name:
             with open(csv_file_path, mode='a', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow([file_name, wheel_angle])
+                writer.writerow([file_name, angle, wheel_angle])
             last_file_name = file_name
             
         
