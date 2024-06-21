@@ -37,7 +37,7 @@ def display_image(display, image):
 manual_steering = 0
 steering_angle = 0
 angle = 0.0
-speed = 30
+speed = 20
 
 def predict_steering_angle(model, image):
     image = image.astype(np.float32) /255
@@ -51,17 +51,8 @@ def set_speed(kmh):
 def set_steering_angle(wheel_angle):
     global angle, steering_angle
     # Check limits of steering
-    if (wheel_angle - steering_angle) > 0.1:
-        wheel_angle = steering_angle + 0.1
-    if (wheel_angle - steering_angle) < -0.1:
-        wheel_angle = steering_angle - 0.1
     steering_angle = wheel_angle
-  
-    # limit range of the steering angle
-    if wheel_angle > 0.5:
-        wheel_angle = 0.5
-    elif wheel_angle < -0.5:
-        wheel_angle = -0.5
+
     # update steering angle
     angle = wheel_angle
 
@@ -120,43 +111,17 @@ def main():
         print(predicted_angle)
         global angle
         angle = float(predicted_angle[0])
-        wheel_angle = angle
         # # Process and display image 
         # grey_image = greyscale_cv2(image)
         # display_image(display_img, grey_image)
         # # Read keyboard
-        key=keyboard.getKey()
-        if key == keyboard.UP: #up
-            global manual_steering
-            angle = 0
-            wheel_angle=0
-            manual_steering=0
-            print("up")
-        elif key == keyboard.DOWN: #down
-            set_speed(speed - 5.0)
-            print("down")
-        elif key == keyboard.RIGHT: #right
-            change_steer_angle(+1)
-            print("right")
-        elif key == keyboard.LEFT: #left
-            change_steer_angle(-1)
-            print("left")
-        elif key == ord('A'):
-            #filename with timestamp and saved in current directory
-            pass
         current_datetime = str(datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f"))
         file_name = current_datetime + ".png"
         
-        print("Image taken")
         print(os.getcwd() + "/" + file_name)
         print(angle)
-        camera.saveImage(os.path.join(image_save_path, file_name), 1)
-            # Save the image name and angle to the CSV file
-        if file_name != last_file_name:
-            with open(csv_file_path, mode='a', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow([file_name, angle])
-            last_file_name = file_name
+        image_pil = Image.fromarray(image)
+        image_pil.save(os.path.join(image_save_path, file_name))
             
         
             

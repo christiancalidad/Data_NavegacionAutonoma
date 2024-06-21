@@ -39,7 +39,7 @@ def display_image(display, image):
 manual_steering = 0
 steering_angle = 0
 angle = 0.0
-speed = 30
+speed = 20
 wheel_angle=0
 # set target speed
 def set_speed(kmh):
