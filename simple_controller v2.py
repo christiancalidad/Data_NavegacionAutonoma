@@ -9,18 +9,16 @@ import os
 import csv
 from time import sleep
 import tensorflow as tf
+import joblib
+from PIL import Image
 #Getting image from camera
 def get_image(camera):
-    raw_image = camera.getImage()  
-    image = np.frombuffer(raw_image, np.uint8).reshape(
-        (camera.getHeight(), camera.getWidth(), 4)
-    )
-    return image
+    raw_image = camera.getImage() 
+    image = np.frombuffer(raw_image, np.uint8)
+    image_pil = Image.frombytes("RGBA", (camera.getWidth(), camera.getHeight()), image)
+    image_np = np.array(image_pil)
+    return image_np
 
-#Image processing
-def greyscale_cv2(image):
-    gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    return gray_img
 
 #Display image 
 def display_image(display, image):
@@ -39,33 +37,12 @@ def display_image(display, image):
 manual_steering = 0
 steering_angle = 0
 angle = 0.0
-speed = 20
+speed = 30
 
-def img_preprocess_webots(img):
-    # print(f"Original shape: {img.shape}")
- 
-    img = img[30:135, :, :]
-    # print(f"After cropping: {img.shape}")
- 
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
-    # print(f"After color conversion: min={img.min()}, max={img.max()}")
- 
-    img = cv2.GaussianBlur(img, (3, 3), 0)
-    # print(f"After Gaussian blur: min={img.min()}, max={img.max()}")
- 
-    img = cv2.resize(img, (200, 66))
-    # print(f"After resizing: min={img.min()}, max={img.max()}")
- 
-    img = img.astype(np.float32)
-    img = (img - img.min()) / (img.max() - img.min())  # Normalización manual
-    # print(f"After manual normalization: min={img.min()}, max={img.max()}")
- 
-    return img
 def predict_steering_angle(model, image):
-    preprocessed_image = img_preprocess_webots(image)
-    prediction = model.predict(np.expand_dims(preprocessed_image, axis=0))
-    steering_angle = float(prediction[0])
-    return steering_angle
+    image = image.astype(np.float32) /255
+    prediction = model.predict(np.expand_dims(image, axis=0))
+    return prediction
 
 # set target speed
 def set_speed(kmh):
@@ -99,11 +76,10 @@ def change_steer_angle(inc):
         set_steering_angle(manual_steering * 0.02)
     # Debugging
     if manual_steering == 0:    
-        #print("going straight")
         pass
     else:
         turn = "left" if steering_angle < 0 else "right"
-        #print("turning {} rad {}".format(str(steering_angle),turn))
+
 
 # main
 def main():
@@ -118,15 +94,16 @@ def main():
     camera = robot.getDevice("camera")
     camera.enable(timestep)  # timestep
 
+    scaler = joblib.load('scaler.pkl')
     # processing display
     #display_img = Display("display_image")
-    model = tf.keras.models.load_model('model_project_v1.h5',compile=False)
+    model = tf.keras.models.load_model('model_project_without_preprocessing.h5',compile=False)
 
     #create keyboard instance
     keyboard=Keyboard()
     keyboard.enable(timestep)
-    image_save_path = os.path.join(os.getcwd(), "train_images")
-    csv_file_path = os.path.join(os.getcwd(), "image_data.csv")
+    image_save_path = os.path.join(os.getcwd(), "test_images")
+    csv_file_path = os.path.join(os.getcwd(), "image_data_test.csv")
     last_file_name = ''
 
     # Create the CSV file and write the header if it doesn't exist
@@ -139,15 +116,17 @@ def main():
         # Get image from camera
         image = get_image(camera)
         predicted_angle = predict_steering_angle(model, image)
+        predicted_angle = scaler.inverse_transform(predicted_angle)
+        print(predicted_angle)
         global angle
-        angle = predicted_angle
+        angle = float(predicted_angle[0])
+        wheel_angle = angle
         # # Process and display image 
         # grey_image = greyscale_cv2(image)
         # display_image(display_img, grey_image)
         # # Read keyboard
         key=keyboard.getKey()
         if key == keyboard.UP: #up
-            global wheel_angle
             global manual_steering
             angle = 0
             wheel_angle=0
@@ -165,23 +144,23 @@ def main():
         elif key == ord('A'):
             #filename with timestamp and saved in current directory
             pass
-        current_datetime = str(datetime.now().strftime("%Y-%m-%d %H-%M-%S"))
+        current_datetime = str(datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f"))
         file_name = current_datetime + ".png"
         
         print("Image taken")
         print(os.getcwd() + "/" + file_name)
         print(angle)
-        # camera.saveImage(os.path.join(image_save_path, file_name), 1)
-        #     # Save the image name and angle to the CSV file
-        # if file_name != last_file_name:
-        #     with open(csv_file_path, mode='a', newline='') as file:
-        #         writer = csv.writer(file)
-        #         writer.writerow([file_name, angle])
-        #     last_file_name = file_name
+        camera.saveImage(os.path.join(image_save_path, file_name), 1)
+            # Save the image name and angle to the CSV file
+        if file_name != last_file_name:
+            with open(csv_file_path, mode='a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([file_name, angle])
+            last_file_name = file_name
             
         
             
-        #update angle and speed
+        # #update angle and speed
         driver.setSteeringAngle(angle)
         driver.setCruisingSpeed(speed)
 

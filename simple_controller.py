@@ -7,7 +7,7 @@ import cv2
 from datetime import datetime
 import os
 import csv
-from time import sleep
+from PIL import Image
 #Getting image from camera
 def get_image(camera):
     raw_image = camera.getImage()  
@@ -40,7 +40,7 @@ manual_steering = 0
 steering_angle = 0
 angle = 0.0
 speed = 30
-
+wheel_angle=0
 # set target speed
 def set_speed(kmh):
     global speed            #robot.step(50)
@@ -108,6 +108,7 @@ def main():
             writer.writerow(["Image Name", "Angle"])
 
     while robot.step() != -1:
+        
         # Get image from camera
         image = get_image(camera)
 
@@ -141,12 +142,14 @@ def main():
         print("Image taken")
         print(os.getcwd() + "/" + file_name)
         print(angle)
-        camera.saveImage(os.path.join(image_save_path, file_name), 1)
+        image_pil = Image.fromarray(image)
+        image_pil.save(os.path.join(image_save_path, file_name))
+        #camera.saveImage(os.path.join(image_save_path, file_name), 1)
             # Save the image name and angle to the CSV file
         if file_name != last_file_name:
             with open(csv_file_path, mode='a', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow([file_name, angle])
+                writer.writerow([file_name, wheel_angle])
             last_file_name = file_name
             
         
