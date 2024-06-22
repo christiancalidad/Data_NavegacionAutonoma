@@ -144,7 +144,7 @@ def main():
         print(angle,wheel_angle)
         image_pil = Image.fromarray(image)
         image_pil.save(os.path.join(image_save_path, file_name))
-        #camera.saveImage(os.path.join(image_save_path, file_name), 1)
+        camera.saveImage(os.path.join(image_save_path, file_name), 1)
             # Save the image name and angle to the CSV file
         if file_name != last_file_name:
             with open(csv_file_path, mode='a', newline='') as file:
