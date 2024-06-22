@@ -39,7 +39,7 @@ def display_image(display, image):
 manual_steering = 0
 steering_angle = 0
 angle = 0.0
-speed = 20
+speed = 25
 wheel_angle=0
 # set target speed
 def set_speed(kmh):
@@ -70,7 +70,7 @@ def change_steer_angle(inc):
     # Validate interval 
     if new_manual_steering <= 25.0 and new_manual_steering >= -25.0: 
         manual_steering = new_manual_steering
-        set_steering_angle(manual_steering * 0.01)
+        set_steering_angle(manual_steering * 0.02)
     # Debugging
     if manual_steering == 0:    
         #print("going straight")
@@ -144,7 +144,7 @@ def main():
         print(angle,wheel_angle)
         image_pil = Image.fromarray(image)
         image_pil.save(os.path.join(image_save_path, file_name))
-        camera.saveImage(os.path.join(image_save_path, file_name), 1)
+        ##### camera.saveImage(os.path.join(image_save_path, file_name), 1)
             # Save the image name and angle to the CSV file
         if file_name != last_file_name:
             with open(csv_file_path, mode='a', newline='') as file:
