@@ -39,7 +39,7 @@ def display_image(display, image):
 manual_steering = 0
 steering_angle = 0
 angle = 0.0
-speed = 25
+speed = 20
 wheel_angle=0
 # set target speed
 def set_speed(kmh):
@@ -70,7 +70,7 @@ def change_steer_angle(inc):
     # Validate interval 
     if new_manual_steering <= 25.0 and new_manual_steering >= -25.0: 
         manual_steering = new_manual_steering
-        set_steering_angle(manual_steering * 0.02)
+        set_steering_angle(manual_steering * 0.05)
     # Debugging
     if manual_steering == 0:    
         #print("going straight")
@@ -97,8 +97,8 @@ def main():
     #create keyboard instance
     keyboard=Keyboard()
     keyboard.enable(timestep)
-    image_save_path = os.path.join(os.getcwd(), "train_images")
-    csv_file_path = os.path.join(os.getcwd(), "image_data.csv")
+    image_save_path = os.path.join(os.getcwd(), "train_images2")
+    csv_file_path = os.path.join(os.getcwd(), "image_data2.csv")
     last_file_name = ''
 
     # Create the CSV file and write the header if it doesn't exist
