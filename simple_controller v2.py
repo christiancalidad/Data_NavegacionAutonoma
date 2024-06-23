@@ -37,7 +37,8 @@ def display_image(display, image):
 manual_steering = 0
 steering_angle = 0
 angle = 0.0
-speed = 20
+speed = 22
+
 
 def predict_steering_angle(model, image):
     image = image.astype(np.float32) /255
@@ -85,10 +86,10 @@ def main():
     camera = robot.getDevice("camera")
     camera.enable(timestep)  # timestep
 
-    scaler = joblib.load('scaler.pkl')
+    scaler = joblib.load('scaler_modelo_corriendo_v1.pkl')
     # processing display
     #display_img = Display("display_image")
-    model = tf.keras.models.load_model('model_project_without_preprocessing.h5',compile=False)
+    model = tf.keras.models.load_model('modelo_corriendo_bien_v1.h5',compile=False)
 
     #create keyboard instance
     keyboard=Keyboard()
