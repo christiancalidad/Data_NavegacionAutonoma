@@ -15,7 +15,7 @@ from PIL import Image
 def get_image(camera):
     raw_image = camera.getImage() 
     image = np.frombuffer(raw_image, np.uint8)
-    image_pil = Image.frombytes("L", (camera.getWidth(), camera.getHeight()), image)
+    image_pil = Image.frombytes("RGBA", (camera.getWidth(), camera.getHeight()), image)
     image_np = np.array(image_pil)
     return image_np
 
@@ -39,10 +39,21 @@ steering_angle = 0
 angle = 0.0
 speed = 20
 
+# Draw the speedometer
+def draw_speedometer(display, speed):
+    display_width = display.getWidth()
+    display_height = display.getHeight()
+    
+    # Clear the display
+    display.setColor(0xFFFFFF)
+    display.fillRectangle(0, 0, display_width, display_height)
+    display.setFont('Arial', 16, True)
+    # Draw the speed text
+    display.setColor(0x000000)
+    display.drawText(f'{speed:.2f} km/h',50,50)
 
 def predict_steering_angle(model, image):
     image = image.astype(np.float32) /255
-    print(image)
     prediction = model.predict(np.expand_dims(image, axis=0))
     return prediction
 
@@ -87,10 +98,13 @@ def main():
     camera = robot.getDevice("camera")
     camera.enable(timestep)  # timestep
 
-    scaler = joblib.load('scaler.pkl')
+    display = robot.getDisplay('display')
+    draw_speedometer(display, speed)
+
+    scaler = joblib.load('scaler_modelo_corriendo_v1.pkl')
     # processing display
     #display_img = Display("display_image")
-    model = tf.keras.models.load_model('model_project_without_preprocessing.h5',compile=False)
+    model = tf.keras.models.load_model('modelo_corriendo_bien_v1.h5',compile=False)
 
     #create keyboard instance
     keyboard=Keyboard()
