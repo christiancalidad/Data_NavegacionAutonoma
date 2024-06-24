@@ -102,9 +102,9 @@ def main():
     reduce_speed = False        #Indicador para reducir la velocidad
     
     #Cargar el escalador
-    scaler = joblib.load('scaler_modelo_corriendo_v1.pkl')
+    scaler = joblib.load('scaler.pkl')
     #Cargar el modelo de aprendizaje profundo
-    model = tf.keras.models.load_model('modelo_corriendo_bien_v1.h5', compile=False)
+    model = tf.keras.models.load_model('model.h5', compile=False)
 
 
     while robot.step() != -1:

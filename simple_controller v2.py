@@ -101,10 +101,10 @@ def main():
     display = robot.getDisplay('display')
     draw_speedometer(display, speed)
 
-    scaler = joblib.load('scaler_modelo_corriendo_v1.pkl')
+    scaler = joblib.load('scaler.pkl')
     # processing display
     #display_img = Display("display_image")
-    model = tf.keras.models.load_model('modelo_corriendo_bien_v1.h5',compile=False)
+    model = tf.keras.models.load_model('model.h5',compile=False)
 
     #create keyboard instance
     keyboard=Keyboard()

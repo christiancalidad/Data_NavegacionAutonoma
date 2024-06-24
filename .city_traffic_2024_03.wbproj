@@ -9,4 +9,4 @@ textFiles: -1
 globalOptionalRendering: CoordinateSystem
 consoles: Console:All:All
 renderingDevicePerspectives: vehicle:camera;1;1.90625;0;0
-renderingDevicePerspectives: vehicle:display;1;1;0.00277204;0.207792
+renderingDevicePerspectives: vehicle:display;1;0.975;0.421954;0.0399977

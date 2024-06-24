@@ -136,7 +136,7 @@ def main():
     #display_img = Display("display_image")
     
     #Cargar el modelo de aprendizaje profundo
-    model = tf.keras.models.load_model('model_project_without_preprocessing.h5',compile=False)
+    model = tf.keras.models.load_model('model.h5',compile=False)
 
     #Crear una instancia del teclado para capturar entradas del usuario
     keyboard=Keyboard()
