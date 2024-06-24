@@ -15,7 +15,7 @@ from PIL import Image
 def get_image(camera):
     raw_image = camera.getImage() 
     image = np.frombuffer(raw_image, np.uint8)
-    image_pil = Image.frombytes("RGBA", (camera.getWidth(), camera.getHeight()), image)
+    image_pil = Image.frombytes("L", (camera.getWidth(), camera.getHeight()), image)
     image_np = np.array(image_pil)
     return image_np
 
@@ -42,6 +42,7 @@ speed = 20
 
 def predict_steering_angle(model, image):
     image = image.astype(np.float32) /255
+    print(image)
     prediction = model.predict(np.expand_dims(image, axis=0))
     return prediction
 

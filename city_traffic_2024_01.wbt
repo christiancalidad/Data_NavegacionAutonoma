@@ -57,7 +57,7 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 
 WorldInfo {
   ERP 0.6
-  basicTimeStep 200
+  basicTimeStep 100
   FPS 30
   lineScale 1
   contactProperties [
@@ -921,7 +921,7 @@ GenericTrafficLight {
   startGreen FALSE
   greenTime 10
   redTime 10
-  state "green"
+  state "red"
 }
 CrossRoadsTrafficLight {
   translation 45 -45 0

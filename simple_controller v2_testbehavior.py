@@ -25,9 +25,9 @@ def get_image(camera):
     #Se convierte la imagen cruda a un arreglo numpy
     image = np.frombuffer(raw_image, np.uint8)
     #Se crea una imagen PIL desde el arreglo numpy
-    image_pil = Image.frombytes("RGBA", (camera.getWidth(), camera.getHeight()), image)
-    #Se convierte la imagen PIL a un arreglo numpy
+    image_pil = Image.frombytes("L", (camera.getWidth(), camera.getHeight()), image)
     image_np = np.array(image_pil)
+    print(image_np)
     #Retornar la imagen como arreglo numpy
     return image_np
 
@@ -50,7 +50,7 @@ def display_image(display, image):
 manual_steering = 0
 steering_angle = 0
 angle = 0.0
-speed = 22
+speed = 20
 
 # Función para predecir el ángulo de dirección utilizando un modelo de aprendizaje profundo:
 # Sen usa un modelo de aprendizaje profundo para predecir el ángulo de dirección basado en una imagen de entrada.
@@ -58,7 +58,7 @@ def predict_steering_angle(model, image):
     #Normalizar la imagen
     image = image.astype(np.float32) / 255  
     #Realizar la predicción
-    prediction = model.predict(np.expand_dims(image, axis=0))  
+    prediction = model.predict(np.expand_dims(image, axis=-1))  
     #Retornar la predicción
     return prediction 
 
@@ -116,14 +116,14 @@ def main():
     camera.enable(timestep)
     
     #Crear una instancia del radar
-    #radar = robot.getDevice("radar")
+    radar = robot.getDevice("radar")
     #Habilitar el radar con el paso de tiempo
-    #radar.enable(timestep)
+    radar.enable(timestep)
     
     #Crear una instancia del sensor de distancia
-    #distance_sensor = robot.getDevice("distance sensor")
+    distance_sensor = robot.getDevice("distance sensor")
     #Habilitar el sensor de distancia con el paso de tiempo
-    #distance_sensor.enable(timestep)
+    distance_sensor.enable(timestep)
     
     #Definir umbrales y variables de control
     threshold_distance = 7      #Distancia umbral para detección de obstáculos
@@ -131,12 +131,12 @@ def main():
     reduce_speed = False        #Indicador para reducir la velocidad
     
     #Cargar el escalador
-    scaler = joblib.load('scaler_modelo_corriendo_v1.pkl')
+    scaler = joblib.load('scaler.pkl')
     #processing display
     #display_img = Display("display_image")
     
     #Cargar el modelo de aprendizaje profundo
-    model = tf.keras.models.load_model('modelo_corriendo_bien_v1.h5',compile=False)
+    model = tf.keras.models.load_model('model_project_without_preprocessing.h5',compile=False)
 
     #Crear una instancia del teclado para capturar entradas del usuario
     keyboard=Keyboard()
@@ -157,44 +157,44 @@ def main():
 
     #Bucle principal de control del robot
     while robot.step() != -1:
-        # global speed
-        # #Obtener los objetivos detectados por el radar
-        # targets = radar.getTargets()
-        # should_stop = False   #Indicador para detener el vehículo
+        global speed
+        #Obtener los objetivos detectados por el radar
+        targets = radar.getTargets()
+        should_stop = False   #Indicador para detener el vehículo
 
-        # #Evaluar cada objetivo detectado por el radar
-        # for target in targets:
-        #     #Obtener la distancia del objetivo
-        #     distance = target.distance
-        #     #Verificar si el objetivo está dentro del umbral
-        #     if distance <= threshold_distance and distance > 1:
-        #         brake_power += 10    #Incrementar la potencia de frenado
-        #         should_stop = True   #Indicar que se debe detener el vehículo
-        #         print(f"Target detectado a distancia: {distance} metros")
-        #         break  #Salir del bucle al encontrar un objetivo cercano
+        #Evaluar cada objetivo detectado por el radar
+        for target in targets:
+            #Obtener la distancia del objetivo
+            distance = target.distance
+            #Verificar si el objetivo está dentro del umbral
+            if distance <= threshold_distance and distance > 1:
+                brake_power += 10    #Incrementar la potencia de frenado
+                should_stop = True   #Indicar que se debe detener el vehículo
+                print(f"Target detectado a distancia: {distance} metros")
+                break  #Salir del bucle al encontrar un objetivo cercano
         
-        # #Obtener la distancia medida por el sensor de distancia
-        # distance = distance_sensor.getValue()
-        # #Verificar si la distancia medida está por debajo del umbral
-        # if distance < 1.5:
-        #     should_stop = True  #Indicar que se debe detener el vehículo
-        #     print(f"Obstáculo detectado por el sensor de distancia: {distance} metros")
+        #Obtener la distancia medida por el sensor de distancia
+        distance = distance_sensor.getValue()
+        #Verificar si la distancia medida está por debajo del umbral
+        if distance < 1.5:
+            should_stop = True  #Indicar que se debe detener el vehículo
+            print(f"Obstáculo detectado por el sensor de distancia: {distance} metros")
 
-        # #Reducir la velocidad o detener el vehículo según los indicadores
-        # if should_stop:
-        #     reduce_speed = True
+        #Reducir la velocidad o detener el vehículo según los indicadores
+        if should_stop:
+            reduce_speed = True
             
-        # else:
-        #     if reduce_speed:
-        #         speed -= brake_power       #Reducir la velocidad gradualmente
-        #         if speed <= 0:
-        #             speed = 0              #Asegurarse de que la velocidad no sea negativa
-        #             reduce_speed = False
-        #     else:
-        #         if speed < 22:
-        #             speed += 1 
+        else:
+            if reduce_speed:
+                speed -= brake_power       #Reducir la velocidad gradualmente
+                if speed <= 0:
+                    speed = 0              #Asegurarse de que la velocidad no sea negativa
+                    reduce_speed = False
+            else:
+                if speed < 20:
+                    speed += 1 
         
-        # print(speed)
+        print(speed)
 
 
         #driver.setCruisingSpeed(speed)
@@ -204,8 +204,8 @@ def main():
         predicted_angle = predict_steering_angle(model, image)
         predicted_angle = scaler.inverse_transform(predicted_angle)
         global angle
-        angle = float(predicted_angle[0])  #Actualizar el ángulo con la predicción
-        print(speed)
+        angle = float(predicted_angle[[0]])  #Actualizar el ángulo con la predicción
+        print(speed,angle)
         #Capturar la entrada del teclado
         current_datetime = str(datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f"))
         file_name = current_datetime + ".png"

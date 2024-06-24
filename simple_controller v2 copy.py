@@ -37,7 +37,7 @@ def display_image(display, image):
 manual_steering = 0
 steering_angle = 0
 angle = 0.0
-speed = 22
+speed = 20
 
 
 def predict_steering_angle(model, image):
